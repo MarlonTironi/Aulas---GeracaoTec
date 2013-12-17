@@ -17,7 +17,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class CadastroDeCursos {
+public class CadastroDeCursos extends Conexao{
 
 	private JFrame frmCadastroDeCursos;
 	private JLabel lblCodigo;
@@ -35,34 +35,24 @@ public class CadastroDeCursos {
 	private Statement consulta;
 	private ResultSet retorno;
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
-
-	}
-
-	/**
-	 * Create the application.
-	 * 
-	 * @wbp.parser.entryPoint
-	 */
-	public CadastroDeCursos() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					initialize();
+					CadastroDeCursos window = new CadastroDeCursos();
+					window.frmCadastroDeCursos.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
-
 	}
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
+	public CadastroDeCursos() {
+		initialize();
+		getConnection();
+	}
+
 	private void initialize() {
 		frmCadastroDeCursos = new JFrame();
 		frmCadastroDeCursos.setVisible(true);
@@ -110,13 +100,8 @@ public class CadastroDeCursos {
 		btnBuscar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					Class.forName("com.mysql.jdbc.Driver").newInstance();
-					String url = "jdbc:mysql://127.0.0.1/cursos?user=root&password=486259mt";
-					Connection cn = DriverManager.getConnection(url);
-					consulta = cn.createStatement();
-					System.out.println("Conexão aberta.");
-					String comando = "select * from cursos.cursos where idcurso = "
-							+ textCodigo.getText();
+					consulta = Conexao.getConnection().createStatement();
+					String comando = "select * from cursos.cursos where idcurso = " + textCodigo.getText();
 					retorno = consulta.executeQuery(comando);
 					retorno.next();
 					String aux;
@@ -132,8 +117,7 @@ public class CadastroDeCursos {
 						lblValorStatus.setText("Código não encontrado ");
 					}
 				} catch (Exception e) {
-					lblValorStatus.setText("Código não encontrado "
-							+ e.getMessage());
+					lblValorStatus.setText("Código não encontrado "	+ e.getMessage());
 					textCurso.setText("  ");
 					textPreco.setText("  ");
 				}
@@ -144,7 +128,24 @@ public class CadastroDeCursos {
 
 		btnAlterar = new JButton("Alterar");
 		btnAlterar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+				int op = JOptionPane.showConfirmDialog(frmCadastroDeCursos,
+								"Confirmação alteração do curso "+ textCurso.getText()+"?","Proceder?",JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE);
+				if(op == 0){
+					consulta= Conexao.getConnection().createStatement();
+					String cod = textCodigo.getText();
+					String cur = textCurso.getText();
+					String pre = textPreco.getText();
+					String comando = "UPDATE cursos.cursos SET curso ='"+cur+"', preco ='"+pre+"' WHERE idcurso ='"+cod+"'";
+					consulta.executeUpdate(comando);
+					lblValorStatus.setText("Alterado com sucesso.");
+					consulta.close();
+				}
+				} catch (Exception e) {
+					lblValorStatus.setText("Código não encontrado " + e.getMessage());
+				}
 			}
 		});
 		btnAlterar.setBounds(10, 124, 89, 23);
@@ -154,18 +155,11 @@ public class CadastroDeCursos {
 		btnIncluir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int confirma = JOptionPane
-						.showConfirmDialog(frmCadastroDeCursos,
-								"Confirmação de inclusão",
-								"Confira se preencheu todos os dados",
-								JOptionPane.YES_NO_OPTION,
-								JOptionPane.QUESTION_MESSAGE);
+						.showConfirmDialog(frmCadastroDeCursos,	"Confirmação de inclusão", "Confira se preencheu todos os dados", 
+								JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 				if (confirma == 0) {
 					try {
-						Class.forName("com.mysql.jdbc.Driver").newInstance();
-						String url = "jdbc:mysql://127.0.0.1/cursos?user=root&password=486259mt";
-						Connection cn = DriverManager.getConnection(url);
-						System.out.println("Conexão aberta.");
-						Statement consulta = cn.createStatement();
+						Statement consulta = Conexao.getConnection().createStatement();
 						String cod = textCodigo.getText();
 						String cur = textCurso.getText();
 						String pre = textPreco.getText();
@@ -180,13 +174,10 @@ public class CadastroDeCursos {
 								+ pre + "');";
 						consulta.executeUpdate(comando);
 						lblValorStatus.setText("Incluido com sucesso.");
-						cn.close();
 						consulta.close();
 					} catch (Exception e) {
-						lblValorStatus.setText("Código não encontrado "
-								+ e.getMessage());
+						lblValorStatus.setText("Código não encontrado "	+ e.getMessage());
 					}
-				} else {
 				}
 			}
 		});
@@ -197,15 +188,10 @@ public class CadastroDeCursos {
 		btnExcluir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-					Class.forName("com.mysql.jdbc.Driver").newInstance();
-					String url = "jdbc:mysql://127.0.0.1/cursos?user=root&password=486259mt";
-					Connection cn = DriverManager.getConnection(url);
-					Statement consulta = cn.createStatement();
-					String comando = "DELETE FROM cursos.cursos WHERE idcurso = "
-							+ textCodigo.getText();
+					Statement consulta = Conexao.getConnection().createStatement();
+					String comando = "DELETE FROM cursos.cursos WHERE idcurso = " + textCodigo.getText();
 					consulta.executeUpdate(comando);
 					lblValorStatus.setText("Excluído com sucesso.");
-					cn.close();
 					consulta.close();
 				} catch (Exception e) {
 					lblValorStatus.setText("Código não encontrado "
