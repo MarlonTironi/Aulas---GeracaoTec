@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
+import br.curso.aula12.metodos.MetodosImplementados;
 import br.curso.aula12.negocios.Conexao;
 
 import java.awt.event.ActionListener;
@@ -17,7 +18,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class CadastroDeCursos extends Conexao{
+public class CadastroDeCursos extends MetodosImplementados {
 
 	private JFrame frmCadastroDeCursos;
 	private JLabel lblCodigo;
@@ -99,28 +100,10 @@ public class CadastroDeCursos extends Conexao{
 		btnBuscar = new JButton("Buscar");
 		btnBuscar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-					consulta = Conexao.getConnection().createStatement();
-					String comando = "select * from cursos.cursos where idcurso = " + textCodigo.getText();
-					retorno = consulta.executeQuery(comando);
-					retorno.next();
-					String aux;
-					int op = retorno.getInt("idcurso");
-					if (op != 0) {
-						aux = (retorno.getString("curso"));
-						System.out.println("Testando " + aux);
-						textCurso.setText(aux);
-						aux = (retorno.getString("preco"));
-						System.out.println("Testando " + aux);
-						textPreco.setText(aux);
-					} else {
-						lblValorStatus.setText("Código não encontrado ");
-					}
-				} catch (Exception e) {
-					lblValorStatus.setText("Código não encontrado "	+ e.getMessage());
-					textCurso.setText("  ");
-					textPreco.setText("  ");
-				}
+				MetodosImplementados m = new MetodosImplementados();
+					lblValorStatus.setText(m.buscar(textCodigo.getText()));
+					textCurso.setText(m.getCurso());
+					textPreco.setText(m.getPreco());
 			}
 		});
 		btnBuscar.setBounds(347, 9, 89, 23);
@@ -129,23 +112,17 @@ public class CadastroDeCursos extends Conexao{
 		btnAlterar = new JButton("Alterar");
 		btnAlterar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-				int op = JOptionPane.showConfirmDialog(frmCadastroDeCursos,
-								"Confirmação alteração do curso "+ textCurso.getText()+"?","Proceder?",JOptionPane.YES_NO_OPTION,
-								JOptionPane.QUESTION_MESSAGE);
-				if(op == 0){
-					consulta= Conexao.getConnection().createStatement();
-					String cod = textCodigo.getText();
-					String cur = textCurso.getText();
-					String pre = textPreco.getText();
-					String comando = "UPDATE cursos.cursos SET curso ='"+cur+"', preco ='"+pre+"' WHERE idcurso ='"+cod+"'";
-					consulta.executeUpdate(comando);
-					lblValorStatus.setText("Alterado com sucesso.");
-					consulta.close();
-				}
-				} catch (Exception e) {
-					lblValorStatus.setText("Código não encontrado " + e.getMessage());
-				}
+				MetodosImplementados m = new MetodosImplementados();
+					int op = JOptionPane.showConfirmDialog(
+							frmCadastroDeCursos,
+							"Confirmação alteração do curso "
+									+ textCurso.getText() + "?", "Proceder?",
+							JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
+					if (op == 0) {
+						lblValorStatus.setText(m.alterar(textCodigo.getText(),
+								textCurso.getText(), textPreco.getText()));
+					}
 			}
 		});
 		btnAlterar.setBounds(10, 124, 89, 23);
@@ -154,30 +131,16 @@ public class CadastroDeCursos extends Conexao{
 		btnIncluir = new JButton("Incluir");
 		btnIncluir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				MetodosImplementados m = new MetodosImplementados();
 				int confirma = JOptionPane
-						.showConfirmDialog(frmCadastroDeCursos,	"Confirmação de inclusão", "Confira se preencheu todos os dados", 
-								JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						.showConfirmDialog(frmCadastroDeCursos,
+								"Confirmação de inclusão",
+								"Confira se preencheu todos os dados",
+								JOptionPane.YES_NO_OPTION,
+								JOptionPane.QUESTION_MESSAGE);
 				if (confirma == 0) {
-					try {
-						Statement consulta = Conexao.getConnection().createStatement();
-						String cod = textCodigo.getText();
-						String cur = textCurso.getText();
-						String pre = textPreco.getText();
-						String comando = "insert into cursos(idcurso, curso, preco) values ("
-								+ "'"
-								+ cod
-								+ "',"
-								+ "'"
-								+ cur
-								+ "',"
-								+ "'"
-								+ pre + "');";
-						consulta.executeUpdate(comando);
-						lblValorStatus.setText("Incluido com sucesso.");
-						consulta.close();
-					} catch (Exception e) {
-						lblValorStatus.setText("Código não encontrado "	+ e.getMessage());
-					}
+					lblValorStatus.setText(m.incluir(textCodigo.getText(),
+							textCurso.getText(), textPreco.getText()));
 				}
 			}
 		});
@@ -187,16 +150,8 @@ public class CadastroDeCursos extends Conexao{
 		btnExcluir = new JButton("Excluir");
 		btnExcluir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-					Statement consulta = Conexao.getConnection().createStatement();
-					String comando = "DELETE FROM cursos.cursos WHERE idcurso = " + textCodigo.getText();
-					consulta.executeUpdate(comando);
-					lblValorStatus.setText("Excluído com sucesso.");
-					consulta.close();
-				} catch (Exception e) {
-					lblValorStatus.setText("Código não encontrado "
-							+ e.getMessage());
-				}
+				MetodosImplementados m = new MetodosImplementados();
+				lblValorStatus.setText(m.excluir(textCodigo.getText()));
 			}
 		});
 		btnExcluir.setBounds(347, 124, 89, 23);
